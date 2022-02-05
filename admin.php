@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function wccc_show_admin_page() {
 	$rules = get_option( 'wccc_category_rules', array() );
+	$rules_order = get_option( 'wccc_category_rules_order', [] );
 	$rule_messages = array();
 
 	$categories = wccc_get_product_categories();
@@ -23,18 +24,22 @@ function wccc_show_edit_rule_page() {
 
 	$selected_categories = [];
 	$confirmation_message = '';
+	$priority = 0;
 
 	if ( $rule_id ) {
 		$rules = get_option( 'wccc_category_rules', array() );
+		$rules_order = get_option( 'wccc_category_rules_order', [] );
 
 		if ( isset( $rules[$rule_id] ) ) {
 			$selected_categories = $rules[$rule_id][0];
 			$confirmation_message = get_option( 'wccc_category_rule_message_' . $rule_id, '' );
+			$priority = array_search( $rule_id, $rules_order ) + 1;
 		}
 	}
 
 	$selected_categories = $_POST['product_categories'] ?? $selected_categories;
 	$confirmation_message = $_POST['confirmation_message'] ?? $confirmation_message;
+	$priority = $_POST['priority'] ?? $priority;
 
 	$confirmation_message = stripcslashes( $confirmation_message );
 
@@ -78,6 +83,8 @@ function wccc_handle_action() {
 		$rule_id = $_POST['rule_id'] ?? uniqid( 'rule' );
 		$confirmation_message = $_POST['confirmation_message'] ?? '';
 		$selected_categories = $_POST['product_categories'] ?? '';
+		$priority = $_POST['priority'] ?? 0;
+		$priority = absint( $priority );
 
 		if ( empty( $confirmation_message ) ) {
 			$GLOBALS['wccc_save_status'] = 'empty_message';
@@ -90,11 +97,24 @@ function wccc_handle_action() {
 		}
 
 		$rules = get_option( 'wccc_category_rules', array() );
-		$rule = [ $selected_categories ];
 
+		$rule = [ $selected_categories ];
 		$rules[$rule_id] = $rule;
 
+		$rules_order = get_option( 'wccc_category_rules_order', [] );
+		$rules_order = array_filter( $rules_order, function( $ordered_rule_id ) use ( $rule_id ) {
+			return $ordered_rule_id !== $rule_id;
+		} );
+
+		if ( $priority && count( $rules_order ) >= $priority ) {
+			array_splice( $rules_order, $priority -1, 0, $rule_id );
+		} else {
+			$rules_order[] = $rule_id;
+			$rules_order = array_values( $rules_order );
+		}
+
 		update_option( 'wccc_category_rules', $rules );
+		update_option( 'wccc_category_rules_order', $rules_order );
 		update_option( 'wccc_category_rule_message_' . $rule_id, $confirmation_message );
 
 		wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=category-confirmations&wccc_saved=1' ) );
@@ -116,6 +136,13 @@ function wccc_handle_action() {
 
 				delete_option( 'wccc_category_rule_message_' . $rule_id );
 
+				$rules_order = get_option( 'wccc_category_rules_order', [] );
+				$rules_order = array_filter( $rules_order, function( $ordered_rule_id ) use ( $rule_id ) {
+					return $ordered_rule_id !== $rule_id;
+				} );
+				$rules_order = array_values( $rules_order );
+
+				update_option( 'wccc_category_rules_order', $rules_order );
 				update_option( 'wccc_category_rules', $rules );
 			}
 

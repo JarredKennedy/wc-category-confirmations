@@ -16,6 +16,7 @@
 				<tr>
 					<th><?php _e( 'Product Categories', 'wc-category-confirmations' ); ?></th>
 					<th><?php _e( 'Message', 'wc-category-confirmations' ); ?></th>
+					<th><?php _e( 'Priority', 'wc-category-confirmations' ); ?></th>
 					<th><?php _e( 'Actions', 'wc-category-confirmations' ); ?></th>
 				</tr>
 			</thead>
@@ -25,6 +26,7 @@
 						<tr>
 							<td><?php echo implode( ', ', array_intersect_key( $categories, array_flip( $rule[0] ) ) ); ?></td>
 							<td><?php echo wccc_get_rule_message_excerpt( $rule_messages[$rule_id] ); ?></td>
+							<td><?php echo array_search( $rule_id, $rules_order ) + 1; ?></td>
 							<td>
 								<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=category-confirmations&wccc-action=edit&rule_id=' . $rule_id ); ?>"><?php _e( 'Edit', 'wc-category-confirmations' ); ?></a>
 								&nbsp;&nbsp;

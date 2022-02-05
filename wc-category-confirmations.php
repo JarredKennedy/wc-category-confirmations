@@ -83,9 +83,10 @@ function wccc_match_product_category_rule( $product_ids ) {
 	$categories = array_column( $categories, 'slug' );
 
 	$rules = get_option( 'wccc_category_rules', array() );
+	$rules_order = get_option( 'wccc_category_rules_order', [] );
 
-	foreach ( $rules as $rule_id => $rule ) {
-		$match = array_intersect( $rule[0], $categories );
+	foreach ( $rules_order as $rule_id ) {
+		$match = array_intersect( $rules[$rule_id][0], $categories );
 
 		if ( ! empty( $match ) ) {
 			$content = get_option( 'wccc_category_rule_message_' . $rule_id );
@@ -118,3 +119,18 @@ function wccc_show_message( $order_id ) {
 }
 
 add_action( 'woocommerce_before_thankyou', 'wccc_show_message' );
+
+function wccc_activate_plugin() {
+	$rules_order = get_option( 'wccc_category_rules_order', [] );
+
+	if ( ! empty( $rules ) ) {
+		return;
+	}
+
+	$rules = get_option( 'wccc_category_rules', [] );
+	$rules_order = array_keys( $rules );
+
+	update_option( 'wccc_category_rules_order', $rules_order );
+}
+
+register_activation_hook( __FILE__, 'wccc_activate_plugin' );

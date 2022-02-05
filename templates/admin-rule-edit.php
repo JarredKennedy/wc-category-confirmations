@@ -33,6 +33,11 @@
 
 		<br>
 
+		<h2>Priority (lowest-first)</h2>
+		<div>
+			<input type="number" name="priority" value="<?php echo $priority; ?>">
+		</div>
+
 		<h2><?php _e( 'Order Confirmation Message', 'wc-category-confirmations' ); ?></h2>
 		<div>
 			<?php wp_editor( $confirmation_message, 'rule-message-editor', [ 'textarea_name' => 'confirmation_message' ] ); ?>
