@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Category Order Confirmations
  * Description: Show customers a custom order confirmation message depending on the category of product purchased.
- * Version: 1.0.2
+ * Version: 1.1.0
  * Author: Jarred Kennedy
  * Author URI: mailto:me@jarredkennedy.com
  */
